@@ -150,6 +150,7 @@ final class MovieQuizViewController: UIViewController {
         
         imageView.layer.borderWidth = 0 //установили толщину рамки 0, для того что бы скрывать цвет после перехода на новый вопрос
         imageView.layer.borderColor = UIColor.clear.cgColor //меняем цвет рамки на прозрачный, после перехода на новый вопрос
+        imageView.layer.cornerRadius = 20 //делаем скругление углов при показе 1-го вопроса
     }
     
     // приватный метод для показа результатов раунда квиза
@@ -159,7 +160,8 @@ final class MovieQuizViewController: UIViewController {
             message: result.text,
             preferredStyle: .alert)
         
-        let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
+        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in //слабая сслка на self
+            guard let self = self else { return } //разворачиваем слабую ссылку
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
@@ -185,7 +187,8 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor //задаем проверку для покраски рамки
         
         // запускаем задачу через 1 секунду c помощью диспетчера задач
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in //слабая ссылка на self
+            guard let self = self else { return } //разворачиваем слабую ссылку
             // код, который мы хотим вызвать через 1 секунду
             self.showNextQuestionOrResults()
         }
