@@ -1,35 +1,5 @@
 import UIKit
 
-//MARK: - Struct
-
-//для состояния вопрос показан
-struct QuizStepViewModel {
-    //картинка с афишей фильма с типом UIImage
-    let image: UIImage
-    //вопрос о рейтинге квиза
-    let question: String
-    //строка с порядковым номером этого вопроса (ex. "1/10")
-    let questionNumber: String
-}
-
-//для состояния "Pезультат квиза"
-struct QuizResultsViewModel {
-    let title: String
-    let text: String
-    let buttonText: String
-}
-
-//состовляем mock данные для вопроса
-struct QuizQuestion {
-    // строка с названием фильма,
-    // совпадает с названием картинки афиши фильма в Assets
-    let image: String
-    // строка с вопросом о рейтинге фильма
-    let text: String
-    // булевое значение (true, false), правильный ответ на вопрос
-    let correctAnswer: Bool
-}
-
 //MARK: - MovieQuizViewController
 
 final class MovieQuizViewController: UIViewController {
@@ -44,15 +14,19 @@ final class MovieQuizViewController: UIViewController {
     
     //метод вызывается когда пользователь нажимает нет
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex] //по индексу текущего вопроса находим нужный нам вопрос
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
         let givenAnswer = false //создаем константу которая в зависимости от ответа дает нам правду или ложь
         
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer) //передаем в метод покраски рамок значение сравнивая ответы пользователя и нащ
+        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer) //передаем в метод покраски рамок значение сравнивая ответы пользователя и наш
     }
     
     //метод вызывается когда пользователь нажимает да
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex]
+        guard let currentQuestion = currentQuestion else {
+            return
+        }
         let givenAnswer = true
         
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
@@ -60,61 +34,12 @@ final class MovieQuizViewController: UIViewController {
     
     //MARK: - Private Properties
     
-    //создаем массив моковых вопросов
-    private let questions: [QuizQuestion] = [
-        QuizQuestion(
-            image: "The Godfather",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: true),
-        
-        QuizQuestion(
-            image: "The Dark Knight",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: true),
-        
-        QuizQuestion(
-            image: "Kill Bill",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: true),
-        
-        QuizQuestion(
-            image: "The Avengers",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: true),
-        
-        QuizQuestion(
-            image: "Deadpool",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: true),
-        
-        QuizQuestion(
-            image: "The Green Knight",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: true),
-        
-        QuizQuestion(
-            image: "Old",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: false),
-        
-        QuizQuestion(
-            image: "The Ice Age Adventures of Buck Wild",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: false),
-        
-        QuizQuestion(
-            image: "Tesla",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: false),
-        
-        QuizQuestion(
-            image: "Vivarium",
-            text: "Рейтинг этого фильма больше чем 6?",
-            correctAnswer: false)
-    ]
-    
     // (по этому индексу будем искать вопрос в массиве, где индекс первого элемента 0, а не 1)
     private var currentQuestionIndex = 0
+    
+    private let questionsAmount = 10 //общее количество вопросов для квиза
+    private var questionFactory: QuestionFactory = QuestionFactory()//фабрика вопросов, к ней будет обращаться контроллер
+    private var currentQuestion: QuizQuestion? //вопрос который видит пользователь
     
     //создаем переменную со счетчиком правильных ответов, где начальное значение равно 0
     private var correctAnswers = 0
@@ -123,12 +48,11 @@ final class MovieQuizViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //получаем теккущий вопрос из массива вопросов по индексу текущего вопроса
-        let currentQuestion = questions[currentQuestionIndex]
-        // Конвертируем его в модель для отображения
-        let viewModel = convert(model: currentQuestion)
-        // Показываем вопрос на экране
-        show(quiz: viewModel)
+        if let firstQuestion = questionFactory.requestNextQuestion() {
+            currentQuestion = firstQuestion
+            let viewModel = convert(model: firstQuestion)
+            show(quiz: viewModel)
+        }
     }
     
     //MARK: - Private Methods
@@ -138,7 +62,7 @@ final class MovieQuizViewController: UIViewController {
         let questionStep = QuizStepViewModel(
             image: UIImage(named: model.image) ?? UIImage(),
             question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questions.count)")
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         return questionStep
     }
     
@@ -165,9 +89,11 @@ final class MovieQuizViewController: UIViewController {
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
-            let firstQuestion = self.questions[self.currentQuestionIndex]
-            let viewModel = self.convert(model: firstQuestion)
-            self.show(quiz: viewModel)
+            if let firstQuestion = self.questionFactory.requestNextQuestion() {
+                self.currentQuestion = firstQuestion
+                let viewModel = self.convert(model: firstQuestion)
+                self.show(quiz: viewModel)
+            }
         }
         
         alert.addAction(action)
@@ -196,7 +122,7 @@ final class MovieQuizViewController: UIViewController {
     
     //приватный метод, который содержит логику перехода в один из сценариев
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questions.count - 1 {
+        if currentQuestionIndex == questionsAmount - 1 {
             //идем в состояние результата квиза
             let text = "Ваш результат: \(correctAnswers)/10" //создаем константу с основным текстом алерта
             let viewModel = QuizResultsViewModel( //вызываем конструктор вью модели и передаем туда данные из макета и созданную выше константу для текста алерта
@@ -207,10 +133,12 @@ final class MovieQuizViewController: UIViewController {
         } else {
             currentQuestionIndex += 1
             //идем в состояние вопрос показан
-            let nextQuestion = questions[currentQuestionIndex]
-            let viewModel = convert(model: nextQuestion)
-            
-            show(quiz: viewModel)
+            if let nextQuestion = questionFactory.requestNextQuestion() {
+                currentQuestion = nextQuestion
+                let viewModel = convert(model: nextQuestion)
+                
+                show(quiz: viewModel)
+            }
         }
     }
 }
