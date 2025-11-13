@@ -10,7 +10,11 @@ import Foundation
 
 class QuestionFactory: QuestionFactoryProtocol {
     
+    //MARK: - Weak Properties
+    weak var delegate: QuestionFactoryDelegate?
+    
     //MARK: - Private Properties
+    private var questionFactory: QuestionFactoryProtocol?
     
     //создаем массив моковых вопросов
     private let questions: [QuizQuestion] = [
@@ -66,12 +70,17 @@ class QuestionFactory: QuestionFactoryProtocol {
     ]
     
     //MARK: - Methods
-    func requestNextQuestion() -> QuizQuestion? {
+    func requestNextQuestion() {
         guard let index = (0..<questions.count).randomElement() else {
-            return nil
+            delegate?.didReceiveNextQuestion(question: nil)
+            return
         }
-        return questions[safe: index]
+        
+        let question = questions[safe: index]
+        delegate?.didReceiveNextQuestion(question: question)
+    }
+    
+    func setup(delegate: QuestionFactoryDelegate) {
+        self.delegate = delegate
     }
 }
-
-protocol QuestionFactoryProtocol {}

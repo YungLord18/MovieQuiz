@@ -7,10 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		194A7FC52EC628C100C2B2F3 /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194A7FC42EC628B600C2B2F3 /* AlertModel.swift */; };
+		194A7FC72EC6292E00C2B2F3 /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194A7FC62EC6292500C2B2F3 /* AlertPresenter.swift */; };
 		1978C4502EB3A6F10096AABA /* QuestionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1978C44F2EB3A6ED0096AABA /* QuestionFactory.swift */; };
 		1978C4522EB3AA7B0096AABA /* QuizStepViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1978C4512EB3AA6F0096AABA /* QuizStepViewModel.swift */; };
 		1978C4542EB3AAAC0096AABA /* QuizResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1978C4532EB3AAA00096AABA /* QuizResultsViewModel.swift */; };
 		1978C4562EB3AACE0096AABA /* QuizQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1978C4552EB3AACC0096AABA /* QuizQuestion.swift */; };
+		1978C45C2EB3BE1C0096AABA /* QuestionFactoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1978C45B2EB3BE190096AABA /* QuestionFactoryProtocol.swift */; };
+		1978C4622EB3DAB30096AABA /* QuestionFactoryDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1978C4612EB3DAB10096AABA /* QuestionFactoryDelegate.swift */; };
 		AD1ABAB22831907B00B3E448 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1ABAB12831907B00B3E448 /* AppDelegate.swift */; };
 		AD1ABAB42831907B00B3E448 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1ABAB32831907B00B3E448 /* SceneDelegate.swift */; };
 		AD1ABAB62831907B00B3E448 /* MovieQuizViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1ABAB52831907B00B3E448 /* MovieQuizViewController.swift */; };
@@ -23,10 +27,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		194A7FC42EC628B600C2B2F3 /* AlertModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertModel.swift; sourceTree = "<group>"; };
+		194A7FC62EC6292500C2B2F3 /* AlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenter.swift; sourceTree = "<group>"; };
 		1978C44F2EB3A6ED0096AABA /* QuestionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactory.swift; sourceTree = "<group>"; };
 		1978C4512EB3AA6F0096AABA /* QuizStepViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizStepViewModel.swift; sourceTree = "<group>"; };
 		1978C4532EB3AAA00096AABA /* QuizResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizResultsViewModel.swift; sourceTree = "<group>"; };
 		1978C4552EB3AACC0096AABA /* QuizQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestion.swift; sourceTree = "<group>"; };
+		1978C45B2EB3BE190096AABA /* QuestionFactoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactoryProtocol.swift; sourceTree = "<group>"; };
+		1978C4612EB3DAB10096AABA /* QuestionFactoryDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactoryDelegate.swift; sourceTree = "<group>"; };
 		AD1ABAAE2831907B00B3E448 /* MovieQuiz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MovieQuiz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD1ABAB12831907B00B3E448 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AD1ABAB32831907B00B3E448 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -58,6 +66,7 @@
 		611342392B701CF6003FC2A4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				194A7FC42EC628B600C2B2F3 /* AlertModel.swift */,
 				1978C4552EB3AACC0096AABA /* QuizQuestion.swift */,
 				1978C4532EB3AAA00096AABA /* QuizResultsViewModel.swift */,
 				1978C4512EB3AA6F0096AABA /* QuizStepViewModel.swift */,
@@ -69,6 +78,8 @@
 			isa = PBXGroup;
 			children = (
 				1978C44F2EB3A6ED0096AABA /* QuestionFactory.swift */,
+				1978C4612EB3DAB10096AABA /* QuestionFactoryDelegate.swift */,
+				1978C45B2EB3BE190096AABA /* QuestionFactoryProtocol.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -77,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				AD1ABAB52831907B00B3E448 /* MovieQuizViewController.swift */,
+				194A7FC62EC6292500C2B2F3 /* AlertPresenter.swift */,
 				AD1ABAB72831907B00B3E448 /* Main.storyboard */,
 			);
 			path = Presentation;
@@ -209,7 +221,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				AD5EE5DE284D7887003966EF /* UIColor+Extensions.swift in Sources */,
+				194A7FC52EC628C100C2B2F3 /* AlertModel.swift in Sources */,
 				AD7AFA552836189F00399704 /* Array+Extensions.swift in Sources */,
+				194A7FC72EC6292E00C2B2F3 /* AlertPresenter.swift in Sources */,
+				1978C45C2EB3BE1C0096AABA /* QuestionFactoryProtocol.swift in Sources */,
+				1978C4622EB3DAB30096AABA /* QuestionFactoryDelegate.swift in Sources */,
 				1978C4522EB3AA7B0096AABA /* QuizStepViewModel.swift in Sources */,
 				1978C4542EB3AAAC0096AABA /* QuizResultsViewModel.swift in Sources */,
 				1978C4562EB3AACE0096AABA /* QuizQuestion.swift in Sources */,

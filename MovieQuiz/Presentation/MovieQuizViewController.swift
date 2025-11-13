@@ -2,7 +2,7 @@ import UIKit
 
 //MARK: - MovieQuizViewController
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     //MARK: - Private Outlet
     
@@ -36,26 +36,62 @@ final class MovieQuizViewController: UIViewController {
     
     // (по этому индексу будем искать вопрос в массиве, где индекс первого элемента 0, а не 1)
     private var currentQuestionIndex = 0
-    
-    private let questionsAmount = 10 //общее количество вопросов для квиза
-    private var questionFactory: QuestionFactory = QuestionFactory()//фабрика вопросов, к ней будет обращаться контроллер
-    private var currentQuestion: QuizQuestion? //вопрос который видит пользователь
-    
     //создаем переменную со счетчиком правильных ответов, где начальное значение равно 0
     private var correctAnswers = 0
+    
+    private let questionsAmount = 10 //общее количество вопросов для квиза
+    private var questionFactory: QuestionFactoryProtocol = QuestionFactory() //фабрика вопросов, к ней будет обращаться контроллер
+    private var currentQuestion: QuizQuestion? //вопрос который видит пользователь
+    private var alertPresenter = AlertPresenter() //добавили презентер
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let firstQuestion = questionFactory.requestNextQuestion() {
-            currentQuestion = firstQuestion
-            let viewModel = convert(model: firstQuestion)
-            show(quiz: viewModel)
+        let questionFactory = QuestionFactory()
+        questionFactory.setup(delegate: self)
+        self.questionFactory = questionFactory
+        
+        questionFactory.requestNextQuestion()
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        //проверка что вопрос не nil
+        guard let question = question else {
+            return
+        }
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
         }
     }
     
+    //MARK: - Methods
+    
+    func show(quiz result: QuizResultsViewModel) {
+        let message = "Вы ответили правильно на \(correctAnswers) из \(questionsAmount) вопросов!"
+        let model = AlertModel(
+            title: result.title,
+            message: message,
+            buttonText: result.buttonText
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.restartGame()
+        }
+        alertPresenter.show(in: self, model: model)
+    }
+    
     //MARK: - Private Methods
+    
+    private func restartGame() {
+        currentQuestionIndex = 0
+        correctAnswers = 0
+        questionFactory.requestNextQuestion()
+    }
     
     //метод конвертации, который принимает моковый вопрос и возвращает вью модель для экрана вопроса
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -75,30 +111,6 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.borderWidth = 0 //установили толщину рамки 0, для того что бы скрывать цвет после перехода на новый вопрос
         imageView.layer.borderColor = UIColor.clear.cgColor //меняем цвет рамки на прозрачный, после перехода на новый вопрос
         imageView.layer.cornerRadius = 20 //делаем скругление углов при показе 1-го вопроса
-    }
-    
-    // приватный метод для показа результатов раунда квиза
-    private func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in //слабая сслка на self
-            guard let self = self else { return } //разворачиваем слабую ссылку
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            if let firstQuestion = self.questionFactory.requestNextQuestion() {
-                self.currentQuestion = firstQuestion
-                let viewModel = self.convert(model: firstQuestion)
-                self.show(quiz: viewModel)
-            }
-        }
-        
-        alert.addAction(action)
-        
-        self.present(alert, animated: true, completion: nil)
     }
     
     //создаем метод который менят цвет рамки в зависимости от правильного ответа пользователя
@@ -133,12 +145,7 @@ final class MovieQuizViewController: UIViewController {
         } else {
             currentQuestionIndex += 1
             //идем в состояние вопрос показан
-            if let nextQuestion = questionFactory.requestNextQuestion() {
-                currentQuestion = nextQuestion
-                let viewModel = convert(model: nextQuestion)
-                
-                show(quiz: viewModel)
-            }
+            questionFactory.requestNextQuestion()
         }
     }
 }
