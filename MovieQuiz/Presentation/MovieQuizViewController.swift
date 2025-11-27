@@ -43,10 +43,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory() //фабрика вопросов, к ней будет обращаться контроллер
     private var currentQuestion: QuizQuestion? //вопрос который видит пользователь
     private var alertPresenter = AlertPresenter() //добавили презентер
+    private var statisticService: StatisticServiceProtocol = StatisticService() //добавили статистику
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        statisticService = StatisticService()
         
         let questionFactory = QuestionFactory()
         questionFactory.setup(delegate: self)
@@ -73,7 +76,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     //MARK: - Methods
     
     func show(quiz result: QuizResultsViewModel) {
-        let message = "Вы ответили правильно на \(correctAnswers) из \(questionsAmount) вопросов!"
+        let bestDate = statisticService.bestGame.date.dateTimeString
+        let bestScore = statisticService.bestGame.correct
+        let totalGames = statisticService.gamesCount
+        let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
+        
+        let message = """
+            Ваш результат: \(correctAnswers)/\(questionsAmount)
+            Количество сыгранных квизов: \(totalGames)
+            Рекорд: \(bestDate)
+            Средняя точность: \(accuracy)%
+            """
+        
         let model = AlertModel(
             title: result.title,
             message: message,
@@ -135,6 +149,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     //приватный метод, который содержит логику перехода в один из сценариев
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
+            //сохраняем результат текущей игры
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
             //идем в состояние результата квиза
             let text = "Ваш результат: \(correctAnswers)/10" //создаем константу с основным текстом алерта
             let viewModel = QuizResultsViewModel( //вызываем конструктор вью модели и передаем туда данные из макета и созданную выше константу для текста алерта
