@@ -1,0 +1,35 @@
+//
+//  ArrayTests.swift
+//  MovieQuiz
+//
+//  Created by Ден on 13.01.2026.
+//
+
+import XCTest //импортируем фреймфорк для тестирования
+@testable import MovieQuiz //импортируем приложение для тестирования
+
+class ArrayTests: XCTestCase {
+    func testGetValueInRange() throws { //тест на успешное взятие элемента по индексу
+        //Given
+        let array = [1, 1, 2, 3, 5]
+        
+        //When
+        let value = array[safe: 2]
+        
+        //Then
+        XCTAssertNotNil(value)
+        XCTAssertEqual(value, 2)
+    }
+    
+    func testGetValueOutOfRange() throws { //тест на взятие элемента по неправильному индексу
+        //Given
+        let array = [1, 1, 2, 3, 5]
+        
+        //When
+        let value = array[safe: 10]
+        
+        //Then
+        XCTAssertNil(value)
+    }
+}
+
