@@ -35,12 +35,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     //MARK: - Private Properties
     
-    // (по этому индексу будем искать вопрос в массиве, где индекс первого элемента 0, а не 1)
-    private var currentQuestionIndex = 0
+    private let presenter = MovieQuizPresenter()
+    
     //создаем переменную со счетчиком правильных ответов, где начальное значение равно 0
     private var correctAnswers = 0
-    
-    private let questionsAmount = 10 //общее количество вопросов для квиза
     private var questionFactory: QuestionFactoryProtocol? //фабрика вопросов, к ней будет обращаться контроллер
     private var currentQuestion: QuizQuestion? //вопрос который видит пользователь
     private var alertPresenter = AlertPresenter() //добавили презентер
@@ -66,7 +64,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             return
         }
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
@@ -82,7 +80,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let accuracy = String(format: "%.2f", statisticService.totalAccuracy)
         
         let message = """
-            Ваш результат: \(correctAnswers)/\(questionsAmount)
+            Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
             Количество сыгранных квизов: \(totalGames)
             Рекорд: \(bestDate)
             Средняя точность: \(accuracy)%
@@ -111,17 +109,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     //MARK: - Private Methods
     
     private func restartGame() {
-        currentQuestionIndex = 0
+        presenter.resetQuestionIndex()
         correctAnswers = 0
         questionFactory?.requestNextQuestion()
-    }
-    
-    //метод конвертации, который принимает моковый вопрос и возвращает вью модель для экрана вопроса
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
     //приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
@@ -156,9 +146,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     //приватный метод, который содержит логику перехода в один из сценариев
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             //сохраняем результат текущей игры
-            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            statisticService.store(correct: correctAnswers, total: presenter.questionsAmount)
             //идем в состояние результата квиза
             let text = "Ваш результат: \(correctAnswers)/10" //создаем константу с основным текстом алерта
             let viewModel = QuizResultsViewModel( //вызываем конструктор вью модели и передаем туда данные из макета и созданную выше константу для текста алерта
@@ -167,7 +157,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 buttonText: "Сыграть еще раз")
             show(quiz: viewModel) //вызываем метод и передаем туда созданную вью модель из константы
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             //идем в состояние вопрос показан
             questionFactory?.requestNextQuestion()
         }
@@ -191,9 +181,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else { return }
             
-            self.currentQuestionIndex = 0
+            self.presenter.resetQuestionIndex()
             self.correctAnswers = 0
-            
             self.questionFactory?.requestNextQuestion()
         }
         
